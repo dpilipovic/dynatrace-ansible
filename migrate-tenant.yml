@@ -1,0 +1,24 @@
+-
+  name: migrate-Dynatrace-tenant-playbook
+  hosts: all
+  strategy: free
+
+  tasks:
+
+  - name: stop oneagent 
+    service:
+      name: oneagent
+      state: stopped
+      enabled: no
+
+  - name: uninstall oneagent 
+    command: /opt/dynatrace/oneagent/agent/uninstall.sh
+
+  - name: Obtain OneAgent from new tenant
+    get_url:
+      url: {{ DESTINATION_URL }}/api/v1/deployment/installer/agent/unix/default/latest?Api-Token="{{ DESTINATION_PAAS_TOKEN }}"&arch=x86&flavor=default/Dynatrace-OneAgent-Linux-1.167.176.sh
+      dest: /tmp/
+
+  - name: Start OneAgent
+    command: /bin/sh /tmp/Dynatrace-OneAgent-Linux-1.167.176.sh  APP_LOG_CONTENT_ACCESS=1
+
